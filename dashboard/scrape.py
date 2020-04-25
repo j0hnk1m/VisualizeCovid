@@ -1,20 +1,50 @@
 import requests
 import re
-from .models import Covid19
+from .models import Country, Province
+from datetime import datetime
 
-def get_data():
-    latest = requests.get('https://covid19api.herokuapp.com/latest').json()
-    confirmed = requests.get('https://covid19api.herokuapp.com/confirmed').json()
-    recovered = requests.get('https://covid19api.herokuapp.com/recovered').json()
-    deaths = requests.get('https://covid19api.herokuapp.com/deaths').json()
+def update_data():
+    countries = Country.objects.all()
+    countries.delete()
 
+    data = requests.get('https://covid19api.herokuapp.com').json()
+    latest = data['latest']
 
-    for country in data:
-        covid19 = Covid19()
-        covid19.save()
+    for category in ['confirmed', 'recovered', 'deaths']:
+        loc = data[category]['locations']
+
+        # Get country if already it already exists in database, otherwise create it
+        c = None
+        try:
+            c = Country.objects.filter(name=loc['country'])[0]
+        except IndexError:
+            c = Country.objects.create(name=loc['country'], code=loc['country_code'])
+
+        # Create province object and fill in model fields
+        p = None
+        try:
+            p = Province.objects.filter(name=loc['province'])[0]
+        except:
+            p = Province.objects.create(
+                name=loc['province'], 
+                country=c,
+                latitude=loc['coordinates']['latitude'],
+                longitude=loc['coordinates']['latitude'],
+                datetime=datetime.now()
+            )
+        
+        if category == 'confirmed':
+            p.confirmed = loc['latest']
+            p.confirmed_history = loc['history']
+        elif category == 'recovered':
+            p.recovered = loc['latest']
+            p.recovered_history = loc['history']
+        elif category == 'deaths':
+            p.deaths = loc['latest']
+            p.deaths_history = loc['history']
+        p.datetime = datetime.now()
+        p.save(update_fields=[category, f"{category}_history", 'datetime'])
+        
     
     return latest
 
-def update_data():
-    data = Covid19.objects.all()
-    data.delete()
