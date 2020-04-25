@@ -1,24 +1,30 @@
 from django.db import models
 
-class Date(models.Model):
-    date = models.DateField("date")
-    confirmed = models.IntegerField("confirmed_cases")
-    deaths = models.IntegerField("deaths")
-    recovered = models.IntegerField("recovered_cases")
-    country = models.CharField(max_length=200) 
+class Province(models.Model):
+    province = models.CharField(max_length=50)
+    country = models.ForeignKey(to=Country, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.date) + ": in: "+ self.country+": confirmed: "+ str(self.confirmed)+ ", deaths: "+ str(self.deaths)+", recovered: "+ str(self.recovered)
+        return f"province: {self.province}, country: {self.country}"
 
-class Live(models.Model):
-    time = models.TimeField("time")
-    confirmed = models.IntegerField("confirmed_cases")
+
+
+class Country(models.Model):
+    country = models.CharField(max_length=50)
+    country_code = models.CharField(max_length=2) 
+    confirmed = models.IntegerField("confirmed")
+    confirmed_history = {}
+    recovered = models.IntegerField("recovered")
+    recovered_history = {}
     deaths = models.IntegerField("deaths")
-    recovered = models.CharField("recovered_cases",max_length=200)
-    new_cases = models.IntegerField("new_cases")
-    new_deaths = models.IntegerField("new_deaths")
-    serious = models.CharField("serious_cases",max_length=200)
-    mortality = models.FloatField("mortality")
-    active = models.CharField("active_cases", max_length=200)
-    country = models.CharField(max_length=200) 
+    deaths_history = {}
 
+    def __str__(self):
+        return f"country: {self.country}," \
+                f"country_code: {self.country_code}," \
+                f"confirmed: {self.confirmed}," \
+                f"confirmed_history: {self.confirmed_history}," \
+                f"recovered: {self.recovered}," \
+                f" recovered_history: {self.recovered_history}," \
+                f"deaths: {self.deaths}," \
+                f"deaths_history: {self.deaths_history}"

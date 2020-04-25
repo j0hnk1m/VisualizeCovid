@@ -3,6 +3,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('ajax/get_country/', views.get_country, name='get_country'),
+    path('', views.home_view, name='home'),
+    path('about/', views.about_view, name='about'),
+    path('sources/', views.sources_view, name='sources'),
+    path('news/', views.news_view, name='news'),
 ]
