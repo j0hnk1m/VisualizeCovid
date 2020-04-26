@@ -2,14 +2,16 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Country(models.Model):
-    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, unique=True)
     code = models.CharField(max_length=2)
 
+    def provinces(self):
+        return Province.objects.filter(country=self)
+    
     def __str__(self):
-        return f"id: {self.id}, " \
-                f"name: {self.name}, " \
+        return f"name: {self.name}, " \
                 f"code: {self.code}"
+            
 
 
 class Province(models.Model):
@@ -17,13 +19,20 @@ class Province(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     datetime = models.DateTimeField("datetime")
 
+    def stat(self):
+        return Stat.objects.filter(province=self)
+    
+    def coordinate(self):
+        return Coordinate.objects.filter(province=self)
+    
+    def cases(self):
+        return Case.objects.filter(province=self)
+    
     def __str__(self):
         return f"name: {self.name}, " \
                 f"country: {self.country}, " \
                 f"datetime: {self.datetime}"
-
-    class Meta:
-        ordering = ['name']
+    
 
 
 class Coordinate(models.Model):
