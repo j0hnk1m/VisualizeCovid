@@ -1,50 +1,90 @@
 import requests
 import re
-from .models import Country, Province
+from .models import Country, Province, Case, Coordinate, Stat
 from datetime import datetime
+from django.utils import timezone
+
+
+def get_country(name_, code_):
+    c = None
+    try:
+        c = Country.objects.filter(name=name_)[0]
+    except IndexError:
+        c = Country.objects.create(name=name_, code=code_)
+    return c
+
+
+def get_province(name_, c, coor, dt):
+    p = None
+    try:
+        p = Province.objects.filter(name=name_)[0]
+    except IndexError:
+        p = Province.objects.create(
+            name=name_, 
+            country=c,
+            datetime=dt
+        )
+        
+        Stat.objects.create(province=p)
+
+        Coordinate.objects.create(
+            latitude=coor['latitude'], 
+            longitude=coor['longitude'],
+            province=p
+        )
+
+        print(f"CREATED NEW PROVINCE: {p}")
+    return p
+
+
+def update_stats(p, category, latest):
+    s = Stat.objects.filter(province=p)[0]
+    if category == 'confirmed':
+        s.confirmed = latest
+    elif category == 'recovered':
+        s.recovered = latest
+    elif category == 'deaths':
+        s.deaths = latest
+    s.save(update_fields=[category, 'province'])
+
+
+def update_history(p, category, history):
+    for d, v in history.items():
+        Case.objects.create(
+            date=datetime.strptime(d, "%m/%d/%y").date(),
+            value=v,
+            category=(category.upper(), category),
+            province=p,
+        )
+
 
 def update_data():
     countries = Country.objects.all()
     countries.delete()
 
+    # Fetch API data
     data = requests.get('https://covid19api.herokuapp.com').json()
     latest = data['latest']
 
+    # Store data in our database
     for category in ['confirmed', 'recovered', 'deaths']:
-        loc = data[category]['locations']
+        locs = data[category]['locations']
+        for loc in locs:
+            # Get country if already it already exists in database, otherwise create it
+            c = get_country(loc['country'], loc['country_code'])
 
-        # Get country if already it already exists in database, otherwise create it
-        c = None
-        try:
-            c = Country.objects.filter(name=loc['country'])[0]
-        except IndexError:
-            c = Country.objects.create(name=loc['country'], code=loc['country_code'])
-
-        # Create province object and fill in model fields
-        p = None
-        try:
-            p = Province.objects.filter(name=loc['province'])[0]
-        except:
-            p = Province.objects.create(
-                name=loc['province'], 
-                country=c,
-                latitude=loc['coordinates']['latitude'],
-                longitude=loc['coordinates']['latitude'],
-                datetime=datetime.now()
+            # Create province object and fill in model fields
+            p = get_province(
+                loc['province'], 
+                c, 
+                loc['coordinates'], 
+                timezone.now()
             )
-        
-        if category == 'confirmed':
-            p.confirmed = loc['latest']
-            p.confirmed_history = loc['history']
-        elif category == 'recovered':
-            p.recovered = loc['latest']
-            p.recovered_history = loc['history']
-        elif category == 'deaths':
-            p.deaths = loc['latest']
-            p.deaths_history = loc['history']
-        p.datetime = datetime.now()
-        p.save(update_fields=[category, f"{category}_history", 'datetime'])
-        
-    
-    return latest
 
+            # Updates province history and last updated time
+            update_stats(p, category, loc['latest'])
+            update_history(p, category, loc['history'])
+            p.datetime = timezone.now()
+            p.save(update_fields=['datetime'])
+        
+    return latest
