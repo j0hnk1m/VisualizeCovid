@@ -3,6 +3,7 @@ import re
 from .models import Country, Province, Case, Coordinate, Stat
 from datetime import datetime
 from django.utils import timezone
+import time
 
 
 def get_country(name_, code_):
@@ -32,8 +33,6 @@ def get_province(name_, c, coor, dt):
             longitude=coor['longitude'],
             province=p
         )
-
-        print(f"CREATED NEW PROVINCE: {p}")
     return p
 
 
@@ -67,6 +66,7 @@ def update_data():
     latest = data['latest']
 
     # Store data in our database
+    start=time.time()
     for category in ['confirmed', 'recovered', 'deaths']:
         locs = data[category]['locations']
         for loc in locs:
@@ -81,10 +81,12 @@ def update_data():
                 timezone.now()
             )
 
-            # Updates province history and last updated time
+            # # Updates province history and last updated time
             update_stats(p, category, loc['latest'])
-            update_history(p, category, loc['history'])
+            # update_history(p, category, loc['history'])
             p.datetime = timezone.now()
             p.save(update_fields=['datetime'])
-        
+    
+    end=time.time()
+    print(end-start)
     return latest

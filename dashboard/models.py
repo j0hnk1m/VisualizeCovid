@@ -30,8 +30,7 @@ class Province(models.Model):
     
     def __str__(self):
         return f"name: {self.name}, " \
-                f"country: {self.country}, " \
-                f"datetime: {self.datetime}"
+                f"country: {self.country}"
     
 
 
