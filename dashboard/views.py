@@ -4,7 +4,7 @@ from . import scrape
 
 
 def home_view(request, *args, **kwargs):
-    latest = scrape.update_data()
+    latest = scrape.get_data()
     return render(request, 'home.html', latest)
 
 def about_view(request, *args, **kwargs):

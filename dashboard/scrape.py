@@ -57,7 +57,7 @@ def update_history(p, category, history):
         )
 
 
-def update_data():
+def get_data():
     countries = Country.objects.all()
     countries.delete()
 
