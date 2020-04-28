@@ -4,10 +4,9 @@ from . import api
 
 
 def home_view(request, *args, **kwargs):
-    latest = api.fetch_api_data()
-    print(latest)
-    country_data = api.get_country_data()
-    return render(request, 'home.html', {'latest': latest, 'country_data': country_data})
+    glob = api.get_global()
+    countries = api.get_countries()
+    return render(request, 'home.html', {'global': glob, 'countries': countries})
 
 def about_view(request, *args, **kwargs):
     return render(request, 'about.html', {})

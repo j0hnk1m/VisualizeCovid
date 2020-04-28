@@ -4,6 +4,7 @@ from datetime import datetime
 from django.utils import timezone
 from tqdm import tqdm
 import pytz
+from django.db.models import Q
 
 
 def update_country(name_, code_, confirmed_, recovered_, deaths_, date_):
@@ -46,20 +47,37 @@ def update_dates(data, c):
             )
 
 
-def get_country_data():
-    return Country.objects.all()
+def get_global():
+    try:
+        return Country.objects.get(name='Global')
+    except:
+        return
 
 
-def get_date_data():
+def get_countries():
+    return Country.objects.filter(~Q(name='Global'))
+
+
+def get_dates():
     return Date.objects.all()
 
 
 def fetch_api_data():
     data = requests.get('https://api.covid19api.com/summary').json()
-    latest = data['Global']
 
+    # Global stats
+    update_country(
+        'Global', 
+        '  ', 
+        data['Global']['TotalConfirmed'], 
+        data['Global']['TotalRecovered'], 
+        data['Global']['TotalDeaths'], 
+        datetime.strptime(data['Date'], '%Y-%m-%dT%H:%M:%SZ').astimezone(pytz.utc)
+    )
+
+    # Countries stats
     for i in data['Countries']:
-        c = update_country(
+        update_country(
             i['Country'], 
             i['CountryCode'], 
             i['TotalConfirmed'], 
@@ -67,8 +85,8 @@ def fetch_api_data():
             i['TotalDeaths'], 
             datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ').astimezone(pytz.utc)
         )
-
-    return latest
+    
+    print("*****************UPDATED DATABASE*****************")
 
 
 def update_time_data():

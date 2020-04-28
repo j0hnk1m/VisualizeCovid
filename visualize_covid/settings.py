@@ -40,7 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'dashboard',
+    'crispy_forms',
+    'django_celery_beat'
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -152,3 +156,23 @@ if DEBUG:
    DEBUG_TOOLBAR_CONFIG = {
        'INTERCEPT_REDIRECTS': False,
    }
+
+# celery
+CELERY_BROKER_URL = 'redis://localhost:6379'  
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'   
+FORKED_BY_MULTIPROCESSING = 1
+
+CELERY_BEAT_SCHEDULE = {
+    'asdf-every-10-seconds': {
+        'task': 'tasks.asdf',
+        'schedule': 10.0,
+    },
+    'update_db-every-hour': {
+        'task': 'tasks.update_db',
+        'schedule': 3600.0,
+    }
+}

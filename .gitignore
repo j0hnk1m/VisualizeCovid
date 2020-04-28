@@ -489,3 +489,5 @@ MigrationBackup/
 .ionide/
 
 .vscode
+celerybeat*
+dump.rdb

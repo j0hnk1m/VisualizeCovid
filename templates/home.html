@@ -1,13 +1,10 @@
-<!doctype html>
-<html>
-  <head>
-      <title>VisualizeCovid</title>
-  </head>
-  <body>
-    <h1>Confirmed: {{ latest.TotalConfirmed }}, Recovered: {{ latest.TotalRecovered }}, Deaths: {{ latest.TotalDeaths }}</h1>
+{% extends "base.html" %}
+{% block content %}
 
-    {% for c in country_data %}
-      <p>{{ c.name }}, {{ c.code }}, {{ c.confirmed }}, {{ c.recovered }}, {{ c.deaths }}, {{ c.mortality }}, {{ c.last_updated }}</p>
-    {% endfor %}
-  </body>
-</html>
+<h1>Confirmed: {{ global.confirmed }}, Recovered: {{ global.recovered }}, Deaths: {{ global.deaths }}</h1>
+
+{% for c in countries %}
+  <p>{{ c.name }}, {{ c.code }}, {{ c.confirmed }}, {{ c.recovered }}, {{ c.deaths }}, {{ c.mortality }}, {{ c.last_updated }}</p>
+{% endfor %}
+
+{% endblock content %}
