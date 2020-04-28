@@ -1,11 +1,13 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from . import scrape
+from . import api
 
 
 def home_view(request, *args, **kwargs):
-    latest = scrape.get_data()
-    return render(request, 'home.html', latest)
+    latest = api.fetch_api_data()
+    print(latest)
+    country_data = api.get_country_data()
+    return render(request, 'home.html', {'latest': latest, 'country_data': country_data})
 
 def about_view(request, *args, **kwargs):
     return render(request, 'about.html', {})

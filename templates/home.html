@@ -1,13 +1,13 @@
 <!doctype html>
 <html>
-<head>
-    <title>covid19live</title>
-</head>
-<body>
+  <head>
+      <title>VisualizeCovid</title>
+  </head>
+  <body>
+    <h1>Confirmed: {{ latest.TotalConfirmed }}, Recovered: {{ latest.TotalRecovered }}, Deaths: {{ latest.TotalDeaths }}</h1>
 
-   {% block content %}
-    yeet
-   {% endblock %} 
-
-    </body>
+    {% for c in country_data %}
+      <p>{{ c.name }}, {{ c.code }}, {{ c.confirmed }}, {{ c.recovered }}, {{ c.deaths }}, {{ c.mortality }}, {{ c.last_updated }}</p>
+    {% endfor %}
+  </body>
 </html>
