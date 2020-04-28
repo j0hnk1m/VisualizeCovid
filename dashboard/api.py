@@ -54,7 +54,7 @@ def get_global():
         return
 
 
-def get_countries():
+def get_countries():               
     return Country.objects.filter(~Q(name='Global'))
 
 
