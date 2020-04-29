@@ -4,7 +4,7 @@ from . import api
 
 
 def home_view(request, *args, **kwargs):
-    if get_countries().count == 0:
+    if api.get_countries().count == 0:
         api.fetch_api_data()
     
     glob = api.get_global()
