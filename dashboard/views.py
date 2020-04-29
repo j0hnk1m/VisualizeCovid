@@ -4,9 +4,10 @@ from . import api
 
 
 def home_view(request, *args, **kwargs):
+    if get_countries().count == 0:
+        api.fetch_api_data()
+    
     glob = api.get_global()
-    if not glob:
-        glob = {'confirmed': 'n/a', 'recovered': 'n/a', 'deaths': 'n/a'}
     countries = api.get_countries()
     return render(request, 'home.html', {'global': glob, 'countries': countries})
 
