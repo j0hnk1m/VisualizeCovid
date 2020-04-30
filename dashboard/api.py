@@ -3,7 +3,6 @@ from .models import Country, Date
 from datetime import datetime
 from django.utils import timezone
 from tqdm import tqdm
-import pytz
 from django.db.models import Q
 
 
@@ -33,13 +32,13 @@ def update_country(name_, code_, confirmed_, recovered_, deaths_, date_):
 
 def update_dates(data, c):
     for i in data:
-        datetime_ = datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ').astimezone(pytz.utc)
+        date_ = datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ').date()
         try:
-            Date.objects.get(datetime=datetime_, country=c)
+            Date.objects.get(date=date_, country=c)
             return
         except:
             Date.objects.create(
-                datetime=datetime_,
+                date=date_,
                 country=c,
                 confirmed=i['Confirmed'],
                 recovered=i['Recovered'],
@@ -72,7 +71,7 @@ def fetch_api_data():
         data['Global']['TotalConfirmed'], 
         data['Global']['TotalRecovered'], 
         data['Global']['TotalDeaths'], 
-        datetime.strptime(data['Date'], '%Y-%m-%dT%H:%M:%SZ').astimezone(pytz.utc)
+        datetime.strptime(data['Date'], '%Y-%m-%dT%H:%M:%SZ').date()
     )
 
     # Countries stats
@@ -83,10 +82,10 @@ def fetch_api_data():
             i['TotalConfirmed'], 
             i['TotalRecovered'], 
             i['TotalDeaths'], 
-            datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ').astimezone(pytz.utc)
+            datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ').date()
         )
     
-    print("*****************UPDATED DATABASE*****************")
+    print("*****************UPDATED DATABASE (COUNTRY)*****************")
 
 
 def update_time_data():
@@ -100,6 +99,9 @@ def update_time_data():
                 country['ISO2'], 
                 data[-1]['Confirmed'], 
                 data[-1]['Recovered'], 
-                data[-1]['Deaths']
+                data[-1]['Deaths'],
+                datetime.strptime(data[-1]['Date'], '%Y-%m-%dT%H:%M:%SZ').date()
             )
             update_dates(data[:-1], c)
+
+    print("*****************UPDATED DATABASE (TIME)*****************")

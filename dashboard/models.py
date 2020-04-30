@@ -7,7 +7,7 @@ class Country(models.Model):
     recovered = models.IntegerField("recovered", default=0)
     deaths = models.IntegerField("deaths", default=0)
     mortality = models.DecimalField("mortality", decimal_places=2, max_digits=5, default=0)
-    last_updated = models.DateTimeField("last_updated")
+    last_updated = models.DateField("last_updated")
 
     class Meta:
         indexes = [
@@ -19,7 +19,7 @@ class Country(models.Model):
 
 
 class Date(models.Model):
-    datetime = models.DateTimeField("datetime")
+    date = models.DateField("date")
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     confirmed = models.IntegerField("confirmed", default=0)
     recovered = models.IntegerField("recovered", default=0)
@@ -27,11 +27,11 @@ class Date(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['datetime', 'country'])
+            models.Index(fields=['date', 'country'])
         ]
 
     def __str__(self):
-        return f"{self.datetime} in {self.country}, " \
+        return f"{self.date} in {self.country}, " \
                 f"confirmed: {self.confirmed}, " \
                 f"recovered: {self.recovered}, " \
                 f"deaths: {self.deaths}"
