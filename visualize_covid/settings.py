@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '0zr9fwp%&n@b(_u#^isd+-)w2)7lwp@anx(g38nh4(v5k37&vz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -167,6 +167,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'   
 FORKED_BY_MULTIPROCESSING = 1
 
+# celery_beat
 CELERY_BEAT_SCHEDULE = {
     'asdf-every-10-seconds': {
         'task': 'tasks.asdf',
