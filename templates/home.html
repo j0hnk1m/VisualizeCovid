@@ -1,7 +1,32 @@
 {% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+
 {% block content %}
 
-<h1>Confirmed: {{ global.confirmed }}, Recovered: {{ global.recovered }}, Deaths: {{ global.deaths }}</h1>
+<h1>Confirmed: {{ global.confirmed|intcomma }}   Recovered: {{ global.recovered|intcomma }}   Deaths: {{ global.deaths|intcomma }}</h1>
+
+<!-- datamap -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+<script src="{% static '/js/datamaps.world.min.js' %}"></script>
+<div id="container" style="position: relative; width: 500px; height: 300px;"></div>
+<script>
+    var map = new Datamap({element: document.getElementById('container')});
+</script>
+
+<!-- jvectormap -->
+<link rel="stylesheet" href="{% static '/css/jquery-jvectormap-2.0.5.css' %}" type="text/css" media="screen"/>
+<script src="{% static '/js/jquery.js' %}"></script>
+<script src="{% static '/js/jquery-jvectormap-2.0.5.min.js' %}"></script>
+<script src="{% static '/js/jquery-jvectormap-world-mill.js' %}"></script>
+
+<div id="world-map" style="width: 600px; height: 400px"></div>
+<script>
+  $(function(){
+    $('#world-map').vectorMap({map: 'world_mill'});
+  });
+</script>
 
 {% for c in countries %}
   <p>{{ c.name }}, {{ c.code }}, {{ c.confirmed }}, {{ c.recovered }}, {{ c.deaths }}, {{ c.mortality }}, {{ c.last_updated }}</p>
