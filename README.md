@@ -11,17 +11,12 @@ I wanted to stop the spread of misinformation and help people realize just how s
 ## Screenshot
 
 ## Installation
-⋅⋅* ```git clone https://github.com/j0hnk1m/visualize_covid.git```
-
-⋅⋅* ```pip install -r requirements.txt```
-
-⋅⋅* ```cd visualize_covid/```
-
-⋅⋅* ```python manage.py makemigrations```
-
-⋅⋅* ```python manage.py migrate```
-
-⋅⋅* ```python manage.py runserver```
+* ```git clone https://github.com/j0hnk1m/visualize_covid.git```
+* ```pip install -r requirements.txt```
+* ```cd visualize_covid/```
+* ```python manage.py makemigrations```
+* ```python manage.py migrate```
+* ```python manage.py runserver```
 
 Now that the server is running, visit ```localhost:8000```
 
