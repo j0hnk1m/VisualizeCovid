@@ -106,3 +106,4 @@ def update_time_data():
             update_dates(data[:-1], c)
         
     print("*****************UPDATED DATABASE (TIME)*****************")
+

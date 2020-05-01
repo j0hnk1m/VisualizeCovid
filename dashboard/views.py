@@ -1,14 +1,14 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from . import api
+from . import scrape
 
 
 def home_view(request, *args, **kwargs):
-    if api.get_countries().count() == 0:
-        api.fetch_api_data()
+    if scrape.get_countries().count() == 0:
+        scrape.fetch_api_data()
     
-    glob = api.get_global()
-    countries = api.get_countries()
+    glob = scrape.get_global()
+    countries = scrape.get_countries()
     return render(request, 'home.html', {'global': glob, 'countries': countries})
 
 def about_view(request, *args, **kwargs):
