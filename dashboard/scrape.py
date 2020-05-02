@@ -18,7 +18,9 @@ def update_country(name_, code_, confirmed_, recovered_, deaths_, date_):
         return c
     except:
         if confirmed_ == 0:
-            confirmed_ = 1
+            mortality_ = 0
+        else:
+            mortality_ = deaths_ / confirmed_
         
         return Country.objects.create(
             name=name_, 
@@ -26,7 +28,7 @@ def update_country(name_, code_, confirmed_, recovered_, deaths_, date_):
             confirmed=confirmed_,
             recovered=recovered_,
             deaths=deaths_,
-            mortality=deaths_/confirmed_*100,
+            mortality=mortality_*100,
             last_updated=datetime.now().date()
         )
 
@@ -55,7 +57,7 @@ def get_global():
 
 
 def get_countries():               
-    return Country.objects.filter(~Q(name='Global'))
+    return Country.objects.all()
 
 
 def get_dates():
