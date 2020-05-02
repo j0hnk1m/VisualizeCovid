@@ -14,8 +14,5 @@ def home_view(request, *args, **kwargs):
 def about_view(request, *args, **kwargs):
     return render(request, 'about.html', {})
 
-def sources_view(request, *args, **kwargs):
-    return render(request, 'sources.html', {})
-
 def news_view(request, *args, **kwargs):
     return render(request, 'news.html', {})

@@ -174,12 +174,12 @@ FORKED_BY_MULTIPROCESSING = 1
 
 # celery_beat
 CELERY_BEAT_SCHEDULE = {
-    'asdf-every-10-seconds': {
-        'task': 'tasks.asdf',
-        'schedule': 10.0,
+    'update_db-every-20-min': {
+        'task': 'tasks.update_db_country',
+        'schedule': 1200.0,
     },
-    'update_db-every-hour': {
-        'task': 'tasks.update_db',
+    'update_time-every-hour': {
+        'task': 'tasks.update_db_time',
         'schedule': 3600.0,
     }
 }

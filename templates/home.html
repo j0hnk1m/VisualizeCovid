@@ -3,6 +3,26 @@
 {% load static %}
 
 {% block content %}
+<!-- pace -->
+<link rel="stylesheet" href="{% static '/css/pace.css' %}">
+<script src="{% static '/js/pace.js' %}"></script>
+
+<!-- datamaps imports -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+<script src="{% static 'js/datamaps.all.min.js' %}"></script>
+
+<!-- jvectormap imports -->
+<link rel="stylesheet" href="{% static '/css/jquery-jvectormap-2.0.5.css' %}" type="text/css" media="screen"/>
+<script src="{% static '/js/jquery-jvectormap-2.0.5.min.js' %}"></script>
+<script src="{% static '/js/jquery-jvectormap-world-mill.js' %}"></script>
+
+<!-- datatables imports -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+<link rel="stylesheet" type="text/css" href="{% static '/css/dataTables.bootstrap4.css' %}" crossorigin="anonymous">
+<script src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+
+
 
 <div class="header" style="margin: 0 auto">
   <h1>Total Confirmed: {{ global.confirmed|intcomma }}</h1>
@@ -10,27 +30,17 @@
   <h1>Total Deaths: {{ global.deaths|intcomma }}</h1>
 </div>
 
+<div id="dm" class="datamaps" style="margin: 0 auto; position: relative; width: 700px; height: 300px;"></div>
 
-<!-- jvectormap -->
-<link rel="stylesheet" href="{% static '/css/jquery-jvectormap-2.0.5.css' %}" type="text/css" media="screen"/>
-<script src="{% static '/js/jquery-jvectormap-2.0.5.min.js' %}"></script>
-<script src="{% static '/js/jquery-jvectormap-world-mill.js' %}"></script>
-<div id="world-map" style="margin: 0 auto; width: 600px; height: 400px"></div>
-<script>
-  $(function(){
-    $('#world-map').vectorMap({map: 'world_mill', 
-                              backgroundColor: '#17202A',
-                              zoomOnScrollSpeed: 2});
-  });
-</script>
+<div id="jvectormap" style="margin: 0 auto; width: 600px; height: 400px"></div>
 
-<!-- datatables -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{% static '/css/dataTables.bootstrap4.css' %}" crossorigin="anonymous">
-<script src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<!-- time slider to change map based on time -->
+<div class="slidecontainer">
+  <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+</div>
 
 
-<p>Last Updated: </p>
+<!-- puts all data by country in a datatable -->
 <table id="table_id" class="table table-dark table-striped table-sm table-hover" cellspacing="0" width="100%">
   <thead>
     <tr>
@@ -41,6 +51,7 @@
       <th scope="col">Deaths</th>
       <th scope="col">Mortality (%)</th>
       <th scope="col">Data</th>
+      <th scope="col">Last Updated</th>
     </tr>
   </thead>
   <tbody>
@@ -52,13 +63,27 @@
       <td>{{ c.recovered|intcomma }}</td>
       <td>{{ c.deaths|intcomma }}</td>
       <td>{{ c.mortality }}</td>
-      <td><button class="editbtn">Data</button></td>
+      <td><button id="view_btn" type="button" class="btn btn-info" onclick="view_country()">View</button></td>
+      <td>{{ c.last_updated }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
+
 <script>
+  var map = new Datamap({
+    element: document.getElementById('dm'),
+  });
+
+  // jvectormap initialization
+  $(function(){
+    $('#jvectormap').vectorMap({map: 'world_mill', 
+                              backgroundColor: '#17202A',
+                              zoomOnScrollSpeed: 2});
+  });
+
+  // datatables initialization
   $(document).ready( function () {
     $('#table_id').DataTable( {
       paging: false,
@@ -71,5 +96,9 @@
       } ]
     });
   } );
+
+  function view_country() {
+    window.alert("Changed");
+  }
 </script>
 {% endblock content %}
