@@ -2,7 +2,7 @@ from django.db import models
 
 class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    slug = models.CharField(max_length=50, default="asdf")
+    slug = models.CharField(max_length=50, unique=True)
     alpha2_code = models.CharField(max_length=2)
     alpha3_code = models.CharField(max_length=3)
     confirmed = models.IntegerField("confirmed", default=0)
@@ -29,7 +29,7 @@ class Date(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['date', 'country'])
+            models.Index(fields=['country'])
         ]
 
     def __str__(self):

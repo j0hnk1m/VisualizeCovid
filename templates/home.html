@@ -52,12 +52,12 @@
     {% for c in countries %}
     <tr>
       <td>{{ c.name }}</td>
-      <td>{{ c.code }}</td>
+      <td>{{ c.alpha2_code }}</td>
       <td>{{ c.confirmed|intcomma }}</td>
       <td>{{ c.recovered|intcomma }}</td>
       <td>{{ c.deaths|intcomma }}</td>
       <td>{{ c.mortality }}</td>
-      <td><button id="view_btn" type="button" class="btn btn-info" onclick="view_country('{{ c.name|lower }}', '{{ c.code|lower }}')">View</button></td>
+      <td><button id="view_btn" type="button" class="btn btn-info" onclick="view_country('{{ c.alpha3_code|lower }}')">View</button></td>
       <td>{{ c.last_updated }}</td>
     </tr>
     {% endfor %}
@@ -66,25 +66,22 @@
 
 
 <script>
-  new_map("world", "..");
+  new_map("...");
 
-  function new_map(name, code) {
-    if (name == 'global') {
-      name = 'world';
-    }
-    else if (name == 'united states of america' || code == 'us') {
-      name = 'usa';
+  function new_map(code) {
+    if (code == '...') {
+      code = 'world';
     }
 
     var map = new Datamap({
       element: document.getElementById('mapcontainer'),
-      scope: name
+      scope: code,
     });
   }
 
-  function view_country(name, code) {
+  function view_country(code) {
     $("#mapcontainer").empty();
-    new_map(name, code);
+    new_map(code);
   }
 
   // datatables initialization

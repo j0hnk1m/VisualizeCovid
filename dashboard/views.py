@@ -9,7 +9,7 @@ def home_view(request, *args, **kwargs):
 
     glob = scrape.get_global()
     countries = scrape.get_countries()
-    return render(request, 'home.html', {'global': glob, 'countries': countries})
+    return render(request, 'home2.html', {'global': glob, 'countries': countries})
 
 def about_view(request, *args, **kwargs):
     return render(request, 'about.html', {})
