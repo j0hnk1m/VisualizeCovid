@@ -183,3 +183,5 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 3600.0,
     }
 }
+
+redbeat_redis_url = "redis://localhost:6379/1"

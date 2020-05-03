@@ -2,7 +2,9 @@ from django.db import models
 
 class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    code = models.CharField(max_length=2)
+    slug = models.CharField(max_length=50, default="asdf")
+    alpha2_code = models.CharField(max_length=2)
+    alpha3_code = models.CharField(max_length=3)
     confirmed = models.IntegerField("confirmed", default=0)
     recovered = models.IntegerField("recovered", default=0)
     deaths = models.IntegerField("deaths", default=0)
@@ -11,7 +13,7 @@ class Country(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['name', 'code'])
+            models.Index(fields=['name', 'alpha2_code'])
         ]
     
     def __str__(self):

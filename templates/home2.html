@@ -7,10 +7,10 @@
 <link rel="stylesheet" href="{% static '/css/pace.css' %}">
 <script src="{% static '/js/pace.js' %}"></script>
 
-<!-- datamaps imports -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
-<script src="{% static 'js/datamaps.all.min.js' %}"></script>
+<!-- jvectormap imports -->
+<link rel="stylesheet" href="{% static '/css/jquery-jvectormap-2.0.5.css' %}" type="text/css" media="screen"/>
+<script src="{% static '/js/jquery-jvectormap-2.0.5.min.js' %}"></script>
+<script src="{% static '/js/jquery-jvectormap-world-mill.js' %}"></script>
 
 <!-- datatables imports -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
@@ -25,8 +25,7 @@
   <h1>Total Deaths: {{ global.deaths|intcomma }}</h1>
 </div>
 
-<div id="mapcontainer" class="datamaps" style="margin: 0 auto; position: relative; width: 900px; height: 500px;"></div>
-
+<div id="jvectormap" style="margin: 0 auto; width: 600px; height: 400px"></div>
 
 <!-- time slider to change map based on time -->
 <div class="slidecontainer">
@@ -66,26 +65,18 @@
 
 
 <script>
-  new_map("world", "..");
-
-  function new_map(name, code) {
-    if (name == 'global') {
-      name = 'world';
-    }
-    else if (name == 'united states of america' || code == 'us') {
-      name = 'usa';
-    }
-
-    var map = new Datamap({
-      element: document.getElementById('mapcontainer'),
-      scope: name
-    });
-  }
-
   function view_country(name, code) {
-    $("#mapcontainer").empty();
-    new_map(name, code);
+    $('#jvectormap').vectorMap('get','mapObject').setFocus({region: code, animate: true});
   }
+
+  // jvectormap initialization
+  $(function(){
+    $('#jvectormap').vectorMap({map: 'world_mill', 
+                              backgroundColor: '#17202A',
+                              zoomOnScrollSpeed: 2,
+                              onRegionClick: function(e,  code,  isSelected,  selectedRegions){$('#jvectormap').vectorMap('get','mapObject').setFocus({region: code, animate: true});
+    }});
+  });
 
   // datatables initialization
   $(document).ready( function () {
