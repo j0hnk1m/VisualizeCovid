@@ -2,14 +2,14 @@ from django.db import models
 
 class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    slug = models.CharField(max_length=50, unique=True)
+    slug = models.CharField(max_length=50)
     alpha2_code = models.CharField(max_length=2)
     alpha3_code = models.CharField(max_length=3)
     confirmed = models.IntegerField("confirmed", default=0)
     recovered = models.IntegerField("recovered", default=0)
     deaths = models.IntegerField("deaths", default=0)
     mortality = models.DecimalField("mortality", decimal_places=2, max_digits=5, default=0)
-    last_updated = models.DateField("last_updated")
+    last_updated = models.DateTimeField("last_updated")
 
     class Meta:
         indexes = [

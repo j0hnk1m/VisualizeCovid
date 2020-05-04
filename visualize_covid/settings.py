@@ -41,7 +41,6 @@ INSTALLED_APPS = [
 
     'dashboard',
     'crispy_forms',
-    'django_celery_beat',
     'django.contrib.humanize'
 ]
 
@@ -162,26 +161,3 @@ if DEBUG:
    DEBUG_TOOLBAR_CONFIG = {
        'INTERCEPT_REDIRECTS': False,
    }
-
-# celery
-CELERY_BROKER_URL = 'redis://localhost:6379'  
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'   
-FORKED_BY_MULTIPROCESSING = 1
-
-# celery_beat
-CELERY_BEAT_SCHEDULE = {
-    'update_db-every-20-min': {
-        'task': 'tasks.update_db_country',
-        'schedule': 1200.0,
-    },
-    'update_time-every-hour': {
-        'task': 'tasks.update_db_time',
-        'schedule': 3600.0,
-    }
-}
-
-redbeat_redis_url = "redis://localhost:6379/1"

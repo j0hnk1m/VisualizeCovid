@@ -5,18 +5,20 @@ from django.utils import timezone
 from tqdm import tqdm
 import pytz
 import pickle
+from collections import defaultdict
 
 
-def update_country(name_, slug_, alpha2, alpha3, confirmed_, recovered_, deaths_, date_):
+def update_country(name_, slug_, alpha2, alpha3, confirmed_, recovered_, deaths_, last_updated_):
     try:
-        c = Country.objects.get(name=name_, alpha2_code=alpha2)
-        c.confirmed = confirmed_
-        c.recovered = recovered_
-        c.deaths = deaths_
-        c.last_updated = date_
-        c.save(update_fields=['confirmed', 'recovered', 'deaths', 'last_updated'])
+        c = Country.objects.get(name=name_)
+        if confirmed_ > c.confirmed:
+            c.confirmed = confirmed_
+            c.recovered = recovered_
+            c.deaths = deaths_
+            c.last_updated = last_updated_
+            c.save(update_fields=['confirmed', 'recovered', 'deaths', 'last_updated'])
         return c
-    except:
+    except Country.DoesNotExist:
         if confirmed_ == 0:
             mortality_ = 0
         else:
@@ -35,26 +37,24 @@ def update_country(name_, slug_, alpha2, alpha3, confirmed_, recovered_, deaths_
         )
 
 
-def update_dates(data, c):
-    for i in data:
-        date_ = datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ').date()
-        try:
-            Date.objects.get(date=date_, country=c)
-            return
-        except:
-            Date.objects.create(
-                date=date_,
-                country=c,
-                confirmed=i['Confirmed'],
-                recovered=i['Recovered'],
-                deaths=i['Deaths']
-            )
+def update_date(date_, vals, c):
+    date_ = datetime.strptime(date_, '%m/%d/%y').date()
+    if not Date.objects.filter(country=c, date=date_).exists():
+        Date.objects.create(
+            date=date_,
+            country=c,
+            confirmed=vals[0],
+            recovered=vals[1],
+            deaths=vals[2]
+        )
+        return False
+    return True
 
 
 def get_global():
     try:
         return Country.objects.get(name='Global')
-    except:
+    except Country.DoesNotExist:
         return
 
 
@@ -64,6 +64,10 @@ def get_countries():
 
 def get_dates():
     return Date.objects.all()
+
+
+def get_last_updated():
+    return
 
 
 # def save_codes(country_name, alpha2_code):
@@ -95,11 +99,11 @@ def fetch_api_data():
         data['Global']['TotalConfirmed'], 
         data['Global']['TotalRecovered'], 
         data['Global']['TotalDeaths'], 
-        datetime.strptime(data['Date'], '%Y-%m-%dT%H:%M:%SZ').date()
+        timezone.make_aware(datetime.strptime(data['Date'], '%Y-%m-%dT%H:%M:%SZ'))
     )
 
     # Countries stats
-    for i in data['Countries']:
+    for i in tqdm(data['Countries']):
         try:
             alpha3 = codes[i['CountryCode']]
         except:
@@ -113,13 +117,13 @@ def fetch_api_data():
             i['TotalConfirmed'], 
             i['TotalRecovered'], 
             i['TotalDeaths'], 
-            datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ').date()
+            timezone.make_aware(datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ'))
         )
     
     print("*****************UPDATED DATABASE (COUNTRY)*****************")
 
 
-def update_time_data():
+def fetch_time_data():
     countries = requests.get('https://api.covid19api.com/countries').json()
     codes = load_codes()
 
@@ -136,12 +140,63 @@ def update_time_data():
                 country['Slug'],
                 country['ISO2'],
                 alpha3, 
-                data[-1]['Confirmed'], 
+                data[-1]['Confirmed'],  
                 data[-1]['Recovered'], 
                 data[-1]['Deaths'],
-                datetime.strptime(data[-1]['Date'], '%Y-%m-%dT%H:%M:%SZ').date()
+                timezone.make_aware(datetime.strptime(data[-1]['Date'], '%Y-%m-%dT%H:%M:%SZ'))
             )
-            update_dates(data[:-1], c)
+            for date in data[::-1]:
+                update_date(date, c)
         
     print("*****************UPDATED DATABASE (TIME)*****************")
 
+
+def fetch_time_data2():
+    data = requests.get('https://covid19api.herokuapp.com').json()
+    codes = load_codes()
+    info = defaultdict(lambda: defaultdict(int))
+
+    for category in tqdm(['confirmed', 'recovered', 'deaths']):
+        locations = data[category]['locations']
+        for h,i in enumerate(locations):
+            alpha3 = '   '
+            if i['country_code'] in codes:
+                alpha3 = codes[i['country_code']]
+            
+            info[i['country']][category] += i['latest']
+            info[i['country']]['alpha2_code'] = i['country_code']
+            info[i['country']]['alpha3_code'] = alpha3
+            info[i['country']]['last_updated'] = data['updatedAt']
+
+            if 'history' not in info[i['country']]:
+                info[i['country']]['history'] = defaultdict(lambda: [0, 0, 0])
+            
+            for k, v in i['history'].items():
+                x = 0
+                if category == 'recovered':
+                    x = 1
+                elif category == 'deaths':
+                    x = 2
+                info[i['country']]['history'][k][x] += v
+    
+    if 0 in info:
+        del info[0]
+    
+    for country in tqdm(list(info.keys())):
+        c = update_country(
+            country, 
+            country.lower(),
+            info[country]['alpha2_code'],
+            info[country]['alpha3_code'],
+            info[country]['confirmed'],  
+            info[country]['recovered'], 
+            info[country]['deaths'],
+            timezone.make_aware(datetime.strptime(info[country]['last_updated'][:-7], '%Y-%m-%d %H:%M:%S'))
+        )
+
+        history = info[country]['history']
+        for date in list(history.keys())[::-1]:
+            if update_date(date, history[date], c):  # if date already exists
+                break
+    
+    print("*****************UPDATED DATABASE (TIME)*****************")
