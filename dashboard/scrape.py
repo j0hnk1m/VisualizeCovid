@@ -8,10 +8,14 @@ import pickle
 from collections import defaultdict
 
 
-def update_country(name_, slug_, alpha2, alpha3, confirmed_, recovered_, deaths_, last_updated_):
+def update_country(name_, slug_, alpha2, alpha3, confirmed_, recovered_, deaths_, last_updated_, time):
     try:
         c = Country.objects.get(name=name_)
-        if confirmed_ > c.confirmed:
+        d = c.last_updated
+        if d.tzinfo is None or d.tzinfo.utcoffset(d) is None:
+            d = pytz.utc.localize(d)
+
+        if last_updated_ > d and not time:
             c.confirmed = confirmed_
             c.recovered = recovered_
             c.deaths = deaths_
@@ -66,10 +70,6 @@ def get_dates():
     return Date.objects.all()
 
 
-def get_last_updated():
-    return
-
-
 # def save_codes(country_name, alpha2_code):
 #     f = open('static/iso_3166_country_codes.json')
 #     codes = {}
@@ -99,7 +99,8 @@ def fetch_api_data():
         data['Global']['TotalConfirmed'], 
         data['Global']['TotalRecovered'], 
         data['Global']['TotalDeaths'], 
-        timezone.make_aware(datetime.strptime(data['Date'], '%Y-%m-%dT%H:%M:%SZ'))
+        timezone.now(),
+        False
     )
 
     # Countries stats
@@ -117,7 +118,8 @@ def fetch_api_data():
             i['TotalConfirmed'], 
             i['TotalRecovered'], 
             i['TotalDeaths'], 
-            timezone.make_aware(datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ'))
+            timezone.make_aware(datetime.strptime(i['Date'], '%Y-%m-%dT%H:%M:%SZ')),
+            False
         )
     
     print("*****************UPDATED DATABASE (COUNTRY)*****************")
@@ -191,7 +193,8 @@ def fetch_time_data2():
             info[country]['confirmed'],  
             info[country]['recovered'], 
             info[country]['deaths'],
-            timezone.make_aware(datetime.strptime(info[country]['last_updated'][:-7], '%Y-%m-%d %H:%M:%S'))
+            timezone.make_aware(datetime.strptime(info[country]['last_updated'][:-7], '%Y-%m-%d %H:%M:%S')),
+            True
         )
 
         history = info[country]['history']
