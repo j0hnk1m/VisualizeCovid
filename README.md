@@ -5,9 +5,6 @@ A webapp built using Django and Python to help visualize data on the COVID19 out
 
 The live version can be found here: [visualizecovid19.herokuapp.com](https://visualizecovid.herokuapp.com/)
 
-## Purpose
-I wanted to stop the spread of misinformation and help people realize just how serious this outbreak is, while at the same time have a go at a chance to learn.
-
 ## Screenshot
 
 ## Installation

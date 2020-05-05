@@ -185,21 +185,13 @@ def fetch_time_data2():
         del info[0]
     
     for country in tqdm(list(info.keys())):
-        c = update_country(
-            country, 
-            country.lower(),
-            info[country]['alpha2_code'],
-            info[country]['alpha3_code'],
-            info[country]['confirmed'],  
-            info[country]['recovered'], 
-            info[country]['deaths'],
-            timezone.make_aware(datetime.strptime(info[country]['last_updated'][:-7], '%Y-%m-%d %H:%M:%S')),
-            True
-        )
-
-        history = info[country]['history']
-        for date in list(history.keys())[::-1]:
-            if update_date(date, history[date], c):  # if date already exists
-                break
+        try:
+            c = Country.objects.get(alpha2_code=info[country]['alpha2_code'])
+            history = info[country]['history']
+            for date in list(history.keys())[::-1]:
+                if update_date(date, history[date], c):  # if date already exists
+                    break
+        except:
+            pass
     
     print("*****************UPDATED DATABASE (TIME)*****************")
