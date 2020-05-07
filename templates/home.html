@@ -1,16 +1,19 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load static %}
+{% load custom_tags %}
 
 {% block content %}
 <!-- pace -->
 <link rel="stylesheet" href="{% static '/css/pace.css' %}">
 <script src="{% static '/js/pace.js' %}"></script>
 
-<!-- datamaps imports -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
-<script src="{% static 'js/datamaps.all.min.js' %}"></script>
+<!-- jvectormap imports -->
+<link rel="stylesheet" href="{% static '/css/jquery-jvectormap-2.0.5.css' %}" type="text/css" media="screen"/>
+<script src="{% static '/js/jquery-jvectormap-2.0.5.min.js' %}"></script>
+<script src="{% static '/js/jquery-jvectormap-world-mill.js' %}"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
 
 <!-- datatables imports -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
@@ -25,14 +28,11 @@
   <h1>Total Deaths: {{ global.deaths|intcomma }}</h1>
 </div>
 
-<div id="mapcontainer" class="datamaps" style="margin: 0 auto; position: relative; width: 900px; height: 500px;"></div>
+<div id="jvectormap" style="margin: 0 auto; width: 900px; height: 500px"></div>
 
-
-<!-- time slider to change map based on time -->
-<div class="slidecontainer">
-  <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+<div id="graphs" style="margin: 0 auto; width: 900px; height: 500px">
+  <canvas id="examChart"></canvas>
 </div>
-
 
 <!-- puts all data by country in a datatable -->
 <table id="table_id" class="table table-dark table-striped table-sm table-hover" cellspacing="0" width="100%">
@@ -57,31 +57,88 @@
       <td>{{ c.recovered|intcomma }}</td>
       <td>{{ c.deaths|intcomma }}</td>
       <td>{{ c.mortality }}</td>
-      <td><button id="view_btn" type="button" class="btn btn-info" onclick="view_country('{{ c.alpha3_code|lower }}')">View</button></td>
+      <td><button id="view_btn" type="button" class="btn btn-info" onclick="view_country('{{ c.name }}', '{{ c.alpha2_code }}')">View</button></td>
       <td>{{ c.last_updated }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
-
 <script>
-  new_map("...");
-
-  function new_map(code) {
-    if (code == '...') {
-      code = 'world';
+  function view_country(country, code) {
+    if (code == "..") {
+      $('#jvectormap').vectorMap('get','mapObject').reset();
     }
-
-    var map = new Datamap({
-      element: document.getElementById('mapcontainer'),
-      scope: code,
-    });
+    else {
+      $('#jvectormap').vectorMap('get','mapObject').setFocus({region: code, animate: true});
+      create_graph(country, code);
+    }
   }
 
-  function view_country(code) {
-    $("#mapcontainer").empty();
-    new_map(code);
+  // jvectormap initialization
+  $(function(){
+    $('#jvectormap').vectorMap({map: 'world_mill', 
+                              backgroundColor: '#17202A',
+                              zoomOnScrollSpeed: 2,
+                              onRegionClick: function(e,  code,  isSelected,  selectedRegions){$('#jvectormap').vectorMap('get','mapObject').setFocus({region: code, animate: true});
+    }});
+  });
+
+  function create_graph(country, code, dates) {
+    // data should be in this format: 
+    // [{
+    //    t: new Date("2015-3-15 13:3"),
+    //    y: 12
+    //  },
+    //  {
+    //    t: new Date("2015-3-25 13:2"),
+    //    y: 21
+    //  },
+    //  {
+    //    t: new Date("2015-4-25 14:12"),
+    //    y: 32
+    //  }]
+
+    $("#graphs").empty();
+
+    var date = "{{ all_dates|get_item:code|get_item:'05/05/2020'|get_item:'confirmed'}}";
+    window.alert(date);
+
+    var ctx = document.getElementById("examChart").getContext("2d");
+    var myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [new Date("2015-3-15 13:3").toLocaleString(), new Date("2015-3-25 13:2").toLocaleString(), new Date("2015-4-25 14:12").toLocaleString()],
+        datasets: [{
+          label: 'Demo',
+          data: data,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)'
+          ],
+          borderColor: [
+            'rgba(255,99,132,1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          xAxes: [{
+            type: 'time'
+          }]
+        }
+      }
+    });
   }
 
   // datatables initialization

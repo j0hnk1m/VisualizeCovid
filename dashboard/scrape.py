@@ -67,7 +67,8 @@ def get_countries():
 
 
 def get_dates():
-    return Date.objects.all()
+    with open('dates.pkl', 'rb') as f:
+        return pickle.load(f)
 
 
 # def save_codes(country_name, alpha2_code):
@@ -131,24 +132,16 @@ def fetch_time_data():
 
     for country in tqdm(countries):  
         data = requests.get(f"https://api.covid19api.com/total/country/{country['Slug']}").json()
-        try:
-            alpha3 = codes[country['ISO2']]
-        except:
-            alpha3 = '   '
         
         if len(data) > 0:
-            c = update_country(
-                country['Country'], 
-                country['Slug'],
-                country['ISO2'],
-                alpha3, 
-                data[-1]['Confirmed'],  
-                data[-1]['Recovered'], 
-                data[-1]['Deaths'],
-                timezone.make_aware(datetime.strptime(data[-1]['Date'], '%Y-%m-%dT%H:%M:%SZ'))
-            )
+            try:
+                alpha3 = codes[country['ISO2']]
+            except:
+                alpha3 = '   '
+
+            c = Country.objects.get(name=data[-1]['Country'])
             for date in data[::-1]:
-                update_date(date, c)
+                update_date(date['Date'], [date['Confirmed'], date['Recovered'], date['Deaths']], c)
         
     print("*****************UPDATED DATABASE (TIME)*****************")
 
@@ -194,4 +187,19 @@ def fetch_time_data2():
         except:
             pass
     
+    data = {}
+    for i in get_countries():
+        dates = Date.objects.filter(country=i)
+        country_info = {}
+        for j in dates:
+            thedate = j.date.strftime("%m/%d/%Y")
+            country_info[thedate] = {}
+            country_info[thedate]['confirmed'] = j.confirmed
+            country_info[thedate]['recovered'] = j.recovered
+            country_info[thedate]['deaths'] = j.deaths
+        data[i.alpha2_code] = country_info
+    
+    with open('dates.pkl', 'wb') as f:
+        pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
+
     print("*****************UPDATED DATABASE (TIME)*****************")
