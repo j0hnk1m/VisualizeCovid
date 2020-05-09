@@ -25,62 +25,13 @@
   <h1>Total Confirmed: {{ global.confirmed|intcomma }}</h1>
   <h1>Total Recovered: {{ global.recovered|intcomma }}</h1>
   <h1>Total Deaths: {{ global.deaths|intcomma }}</h1>
+  <h1>Mortality: {{ global.mortality|intcomma }}%</h1>
 </div>
 
 <div id="jvectormap" style="margin: 0 auto; width: 900px; height: 500px"></div>
 
-<div class="collapse show" id="graph" style="margin: 0 auto; width: 900px; height: 500px">
+<div class="collapse" id="graph" style="margin: 0 auto; width: 900px; height: 500px">
   <canvas id="examChart"></canvas>
-  <script>
-      var ctx = document.getElementById("examChart").getContext("2d");
-      var myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: [new Date("2015-3-15 13:3").toLocaleString(), new Date("2015-3-25 13:2").toLocaleString(), new Date("2015-4-25 14:12").toLocaleString()],
-          datasets: [{
-            label: 'Demo',
-            data: [{
-                t: new Date("2015-3-15 13:3"),
-                y: 12
-              },
-              {
-                t: new Date("2015-3-25 13:2"),
-                y: 21
-              },
-              {
-                t: new Date("2015-4-25 14:12"),
-                y: 32
-              }
-            ],
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(255, 206, 86, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(153, 102, 255, 0.2)',
-              'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-              'rgba(255,99,132,1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          scales: {
-            xAxes: [{
-              type: 'time',
-              distribution: 'linear'
-            }]
-          }
-        }
-      });
-  </script>
 </div>
 
 <!-- <div class="collapse" id="graphs" style="margin: 0 auto; width: 900px; height: 500px">
@@ -132,26 +83,95 @@
     });
   } );
 
+  function clear_graph() {
+    $('#examChart').remove();
+    var canvas = document.createElement('canvas');
+    canvas.id = 'examChart';
+    document.getElementById('graph').appendChild(canvas);
+  }
+
+  function create_graph(country, code, chart_labels, chart_data) {
+    clear_graph();
+
+    var ctx = document.getElementById("examChart").getContext("2d");
+    var myChart = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        labels: chart_labels,
+        datasets: [
+          {
+            label: 'Confirmed',
+            data: chart_data['confirmed'],
+            fill: false,
+            borderColor: 'rgba(245, 84, 66, 1)',
+            pointRadius: 2,
+          },
+          {
+            label: 'Recovered',
+            data: chart_data['recovered'],
+            fill: false,
+            borderColor: 'rgba(66, 245, 11, 1)',
+            pointRadius: 2,
+          },
+          {
+            label: 'Deaths',
+            data: chart_data['deaths'],
+            fill: false,
+            borderColor: 'rgba(255, 255, 255, 1)',
+            pointRadius: 2,
+          },
+        ]
+      },
+      options: {
+        title: {
+          display: true,
+          text: country + " (" + code + ")",
+          fontSize: 30,
+          fontColor: 'rgba(255, 255, 255, 1)'
+        },
+        scales: {
+          xAxes: [{
+            type: 'time'
+          }],
+          yAxes: [{
+            ticks: {
+              beginAtZero:true
+            }
+          }]
+        },
+      }
+    });
+  }
+
   function view_country(country, code) {
     if (code == "..") {
       $('.collapse').collapse('hide');
       $('#jvectormap').vectorMap('get','mapObject').reset();
     }
     else {
+      $('.collapse').collapse('show');
       $('#jvectormap').vectorMap('get','mapObject').setFocus({region: code, animate: true});
 
-      var dates;
       $.ajax({
         type: "GET",
         url: "fetch_dates/",
         dataType: "json",
         data: {"code": code},
         success: function(data) {
-          dates = data;
+          var chart_labels = [];
+          var chart_data = {'confirmed': [], 'recovered': [], 'deaths': []};
+          $.each(data, function( k, v ) {
+            chart_labels.push(new Date(k).toISOString());
+
+            $.each(v, function( category, category_v ) {
+              chart_data[category].push({x: new Date(k), y: category_v});
+            });
+          });
+          
+          create_graph(country, code, chart_labels, chart_data);
         }
       });
 
-      $('.collapse').collapse('show');
     }
   }
 
@@ -160,31 +180,36 @@
     $('#jvectormap').vectorMap({map: 'world_mill', 
                               backgroundColor: '#17202A',
                               zoomOnScrollSpeed: 2,
-                              onRegionClick: function(e,  code,  isSelected,  selectedRegions) {;
-                                view_country('..', code);
+                              initial: {
+                                fill: '#e4e4e4',
+                                "fill-opacity": 1,
+                                stroke: 'none',
+                                "stroke-width": 0,
+                                "stroke-opacity": 1
+                            },
+                              regionStyle: {
+                                selected: {
+                                  fill: '#3D74B2'
+                                }
+                              },
+                              onRegionClick: function(e,  code,  isSelected,  selectedRegions) {
+                                $.ajax({
+                                  type: "GET",
+                                  url: "get_country_stats/",
+                                  data: {"code": code},
+                                  success: function(data) {
+                                    data = JSON.parse(data);
+                                    if (Object.keys(data).length === 0) {
+                                      view_country('', code);
+                                    }
+                                    else {
+                                      view_country(data['name'], code);
+                                    }
+                                  },
+                                });
                               }
+
     });
   });
-
-  function addData(chart, label, data) {
-    chart.data.labels.push(label);
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(data);
-    });
-    chart.update();
-  }
-
-  function removeData(chart) {
-      chart.data.labels.pop();
-      chart.data.datasets.forEach((dataset) => {
-          dataset.data.pop();
-      });
-      chart.update();
-  }
-
-  function updateConfigByMutating(chart, newTitle) {
-    chart.options.title.text = newTitle;
-    chart.update();
-  }
 </script>
 {% endblock content %}

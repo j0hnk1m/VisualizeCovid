@@ -4,6 +4,8 @@ from . import scrape
 from django.utils import timezone
 import json
 from django.views.decorators.csrf import csrf_exempt
+from .models import Country, Date
+
 
 
 def home_view(request, *args, **kwargs):
@@ -24,6 +26,14 @@ def fetch_dates(request):
             data = scrape.get_dates()[code]
         except:
             data = {}
+        return HttpResponse(json.dumps(data))
+
+
+@csrf_exempt
+def get_country_stats(request):
+    if request.is_ajax and request.method == "GET":
+        code = request.GET.get('code')
+        data = scrape.get_country_stats(code)
         print(data)
         return HttpResponse(json.dumps(data))
 

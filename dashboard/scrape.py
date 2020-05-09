@@ -62,6 +62,19 @@ def get_global():
         return
 
 
+def get_country_stats(code):
+    try:
+        c = Country.objects.get(alpha2_code=code)
+        return {
+            'name': c.name,
+            'confirmed': c.confirmed,
+            'recovered': c.recovered,
+            'deaths': c.deaths,
+        }
+    except Country.DoesNotExist:
+        return {}
+
+
 def get_countries():               
     return Country.objects.all()
 
