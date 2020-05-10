@@ -11,11 +11,12 @@ from .models import Country, Date
 def home_view(request, *args, **kwargs):
     if scrape.get_countries().count() == 0 or (timezone.now()-scrape.get_global().last_updated).total_seconds()/3600 > 24:
         scrape.fetch_api_data()
-        scrape.fetch_time_data2()
+        scrape.fetch_time_data()
 
     return render(request, 'home.html', {
                                             'global': scrape.get_global(),
-                                            'countries': scrape.get_countries()
+                                            'countries': scrape.get_countries(),
+                                            'last_updated': scrape.get_last_updated()
                                         })
         
 @csrf_exempt

@@ -4,6 +4,50 @@
 
 {% block content %}
 
-<p>Made by John Kim. This webapp was created using Django. More details can be found here: <a href="https://github.com/j0hnk1m/visualize_covid">github repo</a></p>
+<body class="text-center">
+  <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+    <main role="main" class="inner cover">
+      <h1 class="cover-heading">Made by John Kim</h1>
+      <p class="lead">This webapp was built using Django as the backend and deployed to Heroku.</p>
+      
+      <div class="container" style="margin: 0 auto; margin-top: 20px; margin-bottom: 20px;">
+        <div class="row">
+          <div class="col-md sources">
+            <h3>
+              <small>Source for global/country stats: </small>
+              <a href="https://covid19api.herokuapp.com" class="btn btn-sm btn-primary">API</a>
+            </h3>
+          </div>
+          <div class="col-md sources">
+            <h3>
+              <small>Source for detailed time data: </small>
+              <a href="https://documenter.getpostman.com/view/10808728/SzS8rjbc?version=latest" class="btn btn-sm btn-primary">API</a>
+            </h3>
+          </div>
+        </div>
+      </div>
+      
+      <p class="lead" style="margin-top: 10vh;">Plugins/skills used:</p>
+      <p>
+        Django<br>
+        JVectorMap<br>
+        Chart.js + Moment.js<br>
+        Bootstrap<br>
+        Jquery<br>
+        Ajax<br>
+      </p>
+
+      <p class="lead">
+        <a href="https://github.com/j0hnk1m/visualize_covid" class="btn btn-lg btn-secondary">Github Repo</a>
+      </p>
+    </main>
+
+    <footer class="fixed-bottom mastfoot mt-auto">
+      <div class="inner">
+        <p>Copyright © John Kim 2020</p>
+      </div>
+    </footer>
+  </div>
+</body>
 
 {% endblock %}

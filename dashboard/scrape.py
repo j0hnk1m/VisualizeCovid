@@ -62,6 +62,13 @@ def get_global():
         return
 
 
+def get_last_updated():
+    try:
+        return get_global().last_updated
+    except:
+        return "?"
+
+
 def get_country_stats(code):
     try:
         c = Country.objects.get(alpha2_code=code)
@@ -140,26 +147,6 @@ def fetch_api_data():
 
 
 def fetch_time_data():
-    countries = requests.get('https://api.covid19api.com/countries').json()
-    codes = load_codes()
-
-    for country in tqdm(countries):  
-        data = requests.get(f"https://api.covid19api.com/total/country/{country['Slug']}").json()
-        
-        if len(data) > 0:
-            try:
-                alpha3 = codes[country['ISO2']]
-            except:
-                alpha3 = '   '
-
-            c = Country.objects.get(name=data[-1]['Country'])
-            for date in data[::-1]:
-                update_date(date['Date'], [date['Confirmed'], date['Recovered'], date['Deaths']], c)
-        
-    print("*****************UPDATED DATABASE (TIME)*****************")
-
-
-def fetch_time_data2():
     data = requests.get('https://covid19api.herokuapp.com').json()
     codes = load_codes()
     info = defaultdict(lambda: defaultdict(int))

@@ -20,23 +20,44 @@
 <script src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 
 
-
-<div class="header" style="margin: 0 auto">
-  <h1>Total Confirmed: {{ global.confirmed|intcomma }}</h1>
-  <h1>Total Recovered: {{ global.recovered|intcomma }}</h1>
-  <h1>Total Deaths: {{ global.deaths|intcomma }}</h1>
-  <h1>Mortality: {{ global.mortality|intcomma }}%</h1>
+<div class="container" style="margin: 0 auto; margin-top: 20px; margin-bottom: 20px;">
+  <div class="row">
+    <div class="col-md global-confirmed-color">
+      <h3>
+        <small>Total Confirmed</small>
+        <br>
+        {{ global.confirmed|intcomma }}
+      </h3>
+    </div>
+    <div class="col-md global-recovered-color">
+      <h3>
+        <small>Total Recovered</small>
+        <br>
+        {{ global.recovered|intcomma }}
+      </h3>
+    </div>
+    <div class="col-md global-deaths-color">
+      <h3>
+        <small>Total Deaths</small>
+        <br>
+        {{ global.deaths|intcomma }}
+      </h3>
+    </div>
+    <div class="col-md global-mortality-color">
+      <h3>
+        <small>Mortality</small>
+        <br>
+        {{ global.mortality|intcomma }}%
+      </h3>
+    </div>
+  </div>
 </div>
 
-<div id="jvectormap" style="margin: 0 auto; width: 900px; height: 500px"></div>
+<div id="jvectormap" style="margin-top: 20px; margin: 0 auto; width: 75vw; height: 35vh"></div>
 
-<div class="collapse" id="graph" style="margin: 0 auto; width: 900px; height: 500px">
+<div class="collapse" id="graph" style="margin-top: 20px; margin: 0 auto; width: 75vw; height: 35vh">
   <canvas id="examChart"></canvas>
 </div>
-
-<!-- <div class="collapse" id="graphs" style="margin: 0 auto; width: 900px; height: 500px">
-  <canvas id="examChart"></canvas>
-</div> -->
 
 <!-- puts all data by country in a datatable -->
 <table id="table_id" class="table table-dark table-striped table-sm table-hover" cellspacing="0" width="100%">
@@ -49,7 +70,6 @@
       <th scope="col">Deaths</th>
       <th scope="col">Mortality (%)</th>
       <th scope="col">Data</th>
-      <th scope="col">Last Updated</th>
     </tr>
   </thead>
   <tbody>
@@ -62,7 +82,6 @@
       <td>{{ c.deaths|intcomma }}</td>
       <td>{{ c.mortality }}</td>
       <td><button class="btn btn-info" type="button" onclick="view_country('{{ c.name }}', '{{ c.alpha2_code }}')">View</button></td>
-      <td>{{ c.last_updated|date:'m/d/y H:i' }}</td>
     </tr>
     {% endfor %}
   </tbody>
