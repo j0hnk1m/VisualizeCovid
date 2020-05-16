@@ -6,6 +6,7 @@ from tqdm import tqdm
 import pytz
 import pickle
 from collections import defaultdict
+import operator
 
 
 def update_country(name_, slug_, alpha2, alpha3, confirmed_, recovered_, deaths_, last_updated_, time):
@@ -187,6 +188,8 @@ def fetch_time_data():
         except:
             pass
     
+    prevent_overflow()
+
     data = {}
     for i in get_countries():
         dates = Date.objects.filter(country=i)
@@ -198,8 +201,17 @@ def fetch_time_data():
             country_info[thedate]['recovered'] = j.recovered
             country_info[thedate]['deaths'] = j.deaths
         data[i.alpha2_code] = country_info
-    
+
     with open('dates.pkl', 'wb') as f:
         pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
 
     print("*****************UPDATED DATABASE (TIME)*****************")
+
+
+def prevent_overflow():
+    all_dates = Date.objects.all().order_by('date')
+    country_count = Country.objects.all().count()
+    if all_dates.count()+country_count > 12500:
+        delete_count = all_dates.count()+country_count-12500
+        for i in all_dates[:delete_count]:
+            i.delete()
