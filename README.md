@@ -6,7 +6,7 @@ A webapp built using Django and Python to help visualize data on the COVID19 out
 The live version deployed using Heroku can be found here: [visualizecovid19.herokuapp.com](https://visualizecovid.herokuapp.com/)
 
 ## Screenshot
-![Screenshot of the home page](https://i.imgur.com/Xi6ALm9.png)
+![Screenshot of the home page](https://i.imgur.com/wnMy2QS.png)
 
 ## Installation
 * ```git clone https://github.com/j0hnk1m/visualize_covid.git```
