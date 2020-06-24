@@ -9,7 +9,7 @@ The live version deployed using Heroku can be found here: [visualizecovid19.hero
 ![Screenshot of the home page](https://i.imgur.com/wnMy2QS.png)
 
 ## Installation
-* ```git clone https://github.com/j0hnk1m/visualize_covid.git```
+* ```git clone https://github.com/j0hnk1m/VisualizeCovid.git```
 * ```pip install -r requirements.txt```
 * ```cd visualize_covid/```
 * ```python manage.py makemigrations```
